@@ -12,7 +12,6 @@ import {
 } from '../controllers/fotosReportes.controller';
 
 const router = Router();
-
 router.get('/', getAllFotosReportes);
 router.get('/reporte/:reporteId', getFotosByReporte);
 router.get('/:id', getFotoReporteById);

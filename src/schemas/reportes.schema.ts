@@ -13,6 +13,16 @@ export const createReporteSchema = z.object({
 });
 
 export const updateReporteSchema = z.object({
+    idReporte: z.number().int().positive(),
+    coloracion: z.number().int().positive(),
+    clienteId: z.number().int().positive(),
+    precio: z.number().positive('El precio debe ser mayor a 0'),
+    formula: z.string().min(1, 'La fórmula es requerida').max(255),
+    observaciones: z.string().max(255).default('Sin observaciones'),
+});
+
+
+export const createReporteCompletoSchema = z.object({
     clienteId: z.number().int().positive(),
     fechaServicio: z.string().refine((date) => !isNaN(Date.parse(date)), {
         message: 'Fecha inválida'
@@ -21,9 +31,14 @@ export const updateReporteSchema = z.object({
     coloracionId: z.number().int().positive(),
     formula: z.string().min(1, 'La fórmula es requerida').max(255),
     observaciones: z.string().max(255).default('Sin observaciones'),
-    precio: z.number().positive('El precio debe ser mayor a 0')
-});
+    precio: z.number().positive('El precio debe ser mayor a 0'),
+    fotos: z.array(z.file())
+})
 
+export const generarDocumentoSchema = z.object({
+    reportesIds: z.array(z.number().int().positive()),
+    documentType: z.enum(["pdf","excel"])
+})
 export type CreateReporteDTO = z.infer<typeof createReporteSchema>;
 export type UpdateReporteDTO = z.infer<typeof updateReporteSchema>;
 

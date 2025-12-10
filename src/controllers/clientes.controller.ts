@@ -37,3 +37,29 @@ export async function searchClientes(req: Request, res: Response) {
     res.status(mensaje.code).json(mensaje);
 }
 
+export async function searchClientesPagination(req: Request, res: Response) {
+  const q = req.query as Record<string, string | undefined>;
+  // Optional backward compatibility
+  const p = req.params as Record<string, string | undefined>;
+
+  const page = q.page ?? p.page;
+  const size = q.size ?? p.size;
+
+  const nombre = q.nombre;
+  const email = q.email;
+  const telefono = q.telefono;
+
+  const sortField = q.sortField;
+  const sortOrder = q.sortOrder;
+
+  const mensaje = await ClientesService.searchClientesPagination(
+    page as string,
+    size as string,
+    nombre,
+    email,
+    telefono,
+    sortField,
+    sortOrder
+  );
+  res.status(mensaje.code).json(mensaje);
+}

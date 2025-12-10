@@ -48,10 +48,77 @@ export async function updateUser(id: number, email: string, name: string, update
     }
     }
 
+    export async function updatePassword(passwordHash: string, id: number){
+        try{
+            const [result] = await pool.execute<ResultSetHeader>(
+                'UPDATE users SET password_hash = ? WHERE id = ?'
+                , [passwordHash, id]
+            );
+            if(result.affectedRows === 0) return null;
+
+            return await findById(id);
+        }catch(error){
+            return null;
+        }
+    }
+
 export async function signInUser (email: string, passwordHash: string): Promise<User | null> {
     const user = await findByEmail(email);
     if (!user) return null;
     const isPasswordValid = await compare(passwordHash, user.passwordHash);
     if (!isPasswordValid) return null;
     return { ...user, passwordHash: '' };
+}
+
+export async function findAll(): Promise<User[]> {
+    const [result] = await pool.execute<User[] & RowDataPacket[]>('SELECT id, email, password_hash as passwordHash, name, role_id as role, created_at as createdAt, updated_at as updatedAt FROM users');
+    return result;
+}
+
+export async function searchPagination(
+    page:number,
+    size: number, 
+    email?: string,
+    name?: string,
+    role?: number,
+    sortField?: string,
+    sortOrder?: string
+): Promise<User[]> {
+    const safePage = Math.max(1, page | 0);
+    const safeSize = Math.max(1, size | 0);
+    const offset = (safePage - 1) * safeSize;
+
+    const clauses: string[] = [];
+    const params: any[] = [];
+
+    if(email){
+        clauses.push('email LIKE ?');
+        params.push(`%${email}%`);
+    }
+
+    if(name){
+        clauses.push('name LIKE ?');
+        params.push(`%${name}%`);
+    }
+    if(role && role != -1){
+        clauses.push('role_id = ?');
+        params.push(role);
+    }
+
+    let query=
+    'select id, email, name, role_id as role, created_at as createdAt, updated_at as updatedAt from users';
+
+    if(clauses.length){
+        query += ' where ' + clauses.join(' and ');
+    }
+    if(sortField && sortOrder){
+        query += ` ORDER BY ${sortField} ${sortOrder}`;
+    }else{
+        query += ` ORDER BY id`;
+    } 
+
+    query += ` LIMIT ${safeSize} OFFSET ${offset}`;
+
+    const [rows] = await pool.execute<User[] & RowDataPacket[]>(query, params);
+    return rows;
 }

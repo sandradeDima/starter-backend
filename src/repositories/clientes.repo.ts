@@ -68,4 +68,54 @@ export async function search(query: string): Promise<Cliente[]> {
     );
     return rows;
 }
+export async function searchPagination(
+  page: number,
+  size: number,
+  clientName?: string,
+  clientEmail?: string,
+  clientPhone?: string,
+  sortField?: string,
+  sortOrder?: string,
+): Promise<Cliente[]> {
+  const safePage = Math.max(1, page | 0);
+  const safeSize = Math.max(1, size | 0);
+  const offset = (safePage - 1) * safeSize;
 
+  const clauses: string[] = [];
+  const params: any[] = [];
+
+  const name = clientName?.trim();
+  const email = clientEmail?.trim();
+  const phone = clientPhone?.trim();
+
+  if (name) {
+    clauses.push('nombre LIKE ?');
+    params.push(`%${name}%`);
+  }
+  if (email) {
+    clauses.push('email LIKE ?');
+    params.push(`%${email}%`);
+  }
+  if (phone) {
+    clauses.push('telefono LIKE ?');
+    params.push(`%${phone}%`);
+  }
+
+  let query =
+    'SELECT id, nombre, email, telefono, created_at AS createdAt, updated_at AS updatedAt FROM clientes';
+
+  if (clauses.length) {
+    query += ' WHERE ' + clauses.join(' AND ');
+  }
+  if(sortField && sortOrder){
+    query += ` ORDER BY ${sortField} ${sortOrder}`;
+  }else{
+    query += ` ORDER BY id`;
+  }
+  // 👇 Interpolate already-sanitized numbers
+  query += ` LIMIT ${safeSize} OFFSET ${offset}`;
+
+  console.log(query, params);
+  const [rows] = await pool.execute<(Cliente & RowDataPacket)[]>(query, params);
+  return rows;
+}

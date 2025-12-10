@@ -2,9 +2,10 @@ import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
-import { Router } from 'express';
 import { errorHandler } from './middlewares/error';
 import {router} from './routes';
+import path from 'path';
+
 
 const app = express();
 
@@ -16,9 +17,16 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(helmet());
+// Allow images to be loaded from other origins
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
+
 app.use(express.json({limit:'1mb'}));
 app.use(rateLimit({windowMs:60_000, max:120}));
+
+// Static files for uploaded images
+app.use('/images', express.static(path.resolve(process.cwd(), 'uploads', 'images')));
 
 app.use('/api', router);
 app.use(errorHandler);

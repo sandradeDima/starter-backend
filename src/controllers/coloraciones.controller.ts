@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as ColoracionesService from '../services/coloraciones.service';
+import { logger } from '../config/logger';
 
 export async function getAllColoraciones(req: Request, res: Response) {
     const mensaje = await ColoracionesService.getAllColoraciones();
@@ -32,7 +33,9 @@ export async function deleteColoracion(req: Request, res: Response) {
 }
 
 export async function searchColoraciones(req: Request, res: Response) {
-    const query = req.query.q as string || '';
+    logger.info("llega a searchColoraciones")
+    const query = req.query.query as string || '';
+    logger.info(query)
     const mensaje = await ColoracionesService.searchColoraciones(query);
     res.status(mensaje.code).json(mensaje);
 }

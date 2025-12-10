@@ -116,6 +116,7 @@ export async function deleteColoracion(id: number): Promise<MensajeApi> {
 export async function searchColoraciones(query: string): Promise<MensajeApi> {
     try {
         const mensaje = new MensajeApi();
+        console.log(query);
         const coloraciones = await ColoracionesRepo.search(query);
         mensaje.code = 200;
         mensaje.error = false;

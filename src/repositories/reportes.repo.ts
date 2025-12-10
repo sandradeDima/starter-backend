@@ -6,7 +6,6 @@ export type Reporte = {
     clienteId: number;
     fechaServicio: Date;
     horaServicio: string;
-    coloracionId: number;
     formula: string;
     observaciones: string;
     precio: number;
@@ -17,7 +16,8 @@ export type Reporte = {
 export type ReporteDetallado = Reporte & {
     clienteNombre?: string;
     clienteEmail?: string;
-    coloracionNombre?: string;
+    coloracion?: string;
+    coloracion_desc?: string;
 }
 
 export async function findAll(): Promise<ReporteDetallado[]> {
@@ -27,7 +27,6 @@ export async function findAll(): Promise<ReporteDetallado[]> {
             r.cliente_id as clienteId, 
             r.fecha_servicio as fechaServicio, 
             r.hora_servicio as horaServicio,
-            r.coloracion_id as coloracionId,
             r.formula,
             r.observaciones,
             r.precio,
@@ -35,7 +34,8 @@ export async function findAll(): Promise<ReporteDetallado[]> {
             r.updated_at as updatedAt,
             c.nombre as clienteNombre,
             c.email as clienteEmail,
-            col.nombre as coloracionNombre
+            col.nombre as coloracion,
+            col.descripcion as coloracion_desc
         FROM reportes r
         LEFT JOIN clientes c ON r.cliente_id = c.id
         LEFT JOIN coloraciones col ON r.coloracion_id = col.id
@@ -51,7 +51,6 @@ export async function findById(id: number): Promise<ReporteDetallado | null> {
             r.cliente_id as clienteId, 
             r.fecha_servicio as fechaServicio, 
             r.hora_servicio as horaServicio,
-            r.coloracion_id as coloracionId,
             r.formula,
             r.observaciones,
             r.precio,
@@ -59,7 +58,8 @@ export async function findById(id: number): Promise<ReporteDetallado | null> {
             r.updated_at as updatedAt,
             c.nombre as clienteNombre,
             c.email as clienteEmail,
-            col.nombre as coloracionNombre
+            col.nombre as coloracion,
+            col.descripcion as coloracion_desc
         FROM reportes r
         LEFT JOIN clientes c ON r.cliente_id = c.id
         LEFT JOIN coloraciones col ON r.coloracion_id = col.id
@@ -76,7 +76,6 @@ export async function findByCliente(clienteId: number): Promise<ReporteDetallado
             r.cliente_id as clienteId, 
             r.fecha_servicio as fechaServicio, 
             r.hora_servicio as horaServicio,
-            r.coloracion_id as coloracionId,
             r.formula,
             r.observaciones,
             r.precio,
@@ -84,7 +83,8 @@ export async function findByCliente(clienteId: number): Promise<ReporteDetallado
             r.updated_at as updatedAt,
             c.nombre as clienteNombre,
             c.email as clienteEmail,
-            col.nombre as coloracionNombre
+            col.nombre as coloracion,
+            col.descripcion as coloracion_desc
         FROM reportes r
         LEFT JOIN clientes c ON r.cliente_id = c.id
         LEFT JOIN coloraciones col ON r.coloracion_id = col.id
@@ -116,16 +116,14 @@ export async function create(
 export async function update(
     id: number,
     clienteId: number,
-    fechaServicio: Date,
-    horaServicio: string,
     coloracionId: number,
     formula: string,
     observaciones: string,
     precio: number
 ): Promise<ReporteDetallado | null> {
     const [result] = await pool.execute<ResultSetHeader>(
-        'UPDATE reportes SET cliente_id = ?, fecha_servicio = ?, hora_servicio = ?, coloracion_id = ?, formula = ?, observaciones = ?, precio = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-        [clienteId, fechaServicio, horaServicio, coloracionId, formula, observaciones, precio, id]
+        'UPDATE reportes SET cliente_id = ?, coloracion_id = ?, formula = ?, observaciones = ?, precio = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [clienteId, coloracionId, formula, observaciones, precio, id]
     );
     if (result.affectedRows === 0) return null;
     return await findById(id);
@@ -146,7 +144,6 @@ export async function findByDateRange(startDate: Date, endDate: Date): Promise<R
             r.cliente_id as clienteId, 
             r.fecha_servicio as fechaServicio, 
             r.hora_servicio as horaServicio,
-            r.coloracion_id as coloracionId,
             r.formula,
             r.observaciones,
             r.precio,
@@ -154,7 +151,8 @@ export async function findByDateRange(startDate: Date, endDate: Date): Promise<R
             r.updated_at as updatedAt,
             c.nombre as clienteNombre,
             c.email as clienteEmail,
-            col.nombre as coloracionNombre
+            col.nombre as coloracion,
+            col.descripcion as coloracion_desc
         FROM reportes r
         LEFT JOIN clientes c ON r.cliente_id = c.id
         LEFT JOIN coloraciones col ON r.coloracion_id = col.id

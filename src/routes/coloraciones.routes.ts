@@ -11,7 +11,6 @@ import {
 } from '../controllers/coloraciones.controller';
 
 const router = Router();
-
 router.get('/', getAllColoraciones);
 router.get('/search', searchColoraciones);
 router.get('/:id', getColoracionById);

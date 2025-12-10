@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import type { Express } from 'express';
 import * as ReportesService from '../services/reportes.service';
 
 export async function getAllReportes(req: Request, res: Response) {
@@ -34,13 +35,11 @@ export async function createReporte(req: Request, res: Response) {
 
 export async function updateReporte(req: Request, res: Response) {
     const id = parseInt(req.params.id);
-    const { clienteId, fechaServicio, horaServicio, coloracionId, formula, observaciones, precio } = req.body;
+    const { clienteId, coloracion, formula, observaciones, precio,idReporte } = req.body;
     const mensaje = await ReportesService.updateReporte(
         id,
         clienteId,
-        new Date(fechaServicio),
-        horaServicio,
-        coloracionId,
+        coloracion,
         formula,
         observaciones,
         precio
@@ -63,3 +62,33 @@ export async function getReportesByDateRange(req: Request, res: Response) {
     res.status(mensaje.code).json(mensaje);
 }
 
+export async function createReporteCompleto(req: Request, res: Response) {
+    const { clienteId, fechaServicio, horaServicio, coloracionId, formula, observaciones, precio } = req.body;
+    const fotos = (req.files as Express.Multer.File[] | undefined) ?? [];
+
+    const mensaje = await ReportesService.createReporteCompleto(
+        Number(clienteId),
+        new Date(fechaServicio),
+        horaServicio,
+        Number(coloracionId),
+        formula,
+        observaciones ?? 'Sin observaciones',
+        Number(precio),
+        fotos
+    );
+    res.status(mensaje.code).json(mensaje);
+}
+
+export async function generarDocumento(req:Request,res:Response) {
+    const {reportesIds,documentType} = req.body;
+    const resultado = await ReportesService.generarDocumento(reportesIds,documentType);
+
+    if (!resultado.ok) {
+        res.status(resultado.mensaje.code).json(resultado.mensaje);
+        return;
+    }
+
+    res.setHeader('Content-Type', resultado.contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${resultado.filename}"`);
+    res.send(resultado.buffer);
+}

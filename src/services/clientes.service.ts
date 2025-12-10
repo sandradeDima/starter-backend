@@ -99,6 +99,8 @@ export async function updateCliente(id: number, nombre: string, email: string, t
         }
         
         const cliente = await ClientesRepo.update(id, nombre, email, telefono);
+
+        
         mensaje.code = 200;
         mensaje.error = false;
         mensaje.message = 'Cliente actualizado correctamente';
@@ -157,3 +159,33 @@ export async function searchClientes(query: string): Promise<MensajeApi> {
     }
 }
 
+export async function searchClientesPagination(page: string, size: string, clientName?: string, clientEmail?: string, clientPhone?: string, sortField?: string, sortOrder?: string): Promise<MensajeApi> {
+    try {
+        const mensaje = new MensajeApi();
+        const clientes = await ClientesRepo.searchPagination(parseInt(page), parseInt(size), clientName, clientEmail, clientPhone, sortField, sortOrder);
+        const total = (clientes
+
+            
+        ).length;
+        const pages = Math.ceil(total / parseInt(size));
+        //chheck if page is valid
+        if (parseInt(page) < 1 || parseInt(page) > pages) {
+            mensaje.code = 404;
+            mensaje.error = true;
+            mensaje.message = 'Pagina no encontrada';
+            return mensaje;
+        }
+        mensaje.code = 200;
+        mensaje.error = false;
+        mensaje.message = 'Búsqueda realizada correctamente';
+        mensaje.data = {clientes, total, pages};
+        return mensaje;
+    } catch (error) {
+        const mensaje = new MensajeApi();
+        mensaje.code = 500;
+        mensaje.error = true;
+        mensaje.message = 'Error al buscar clientes';
+        mensaje.technicalMessage = error instanceof Error ? error.message : 'Error desconocido';
+        return mensaje;
+    }
+}
