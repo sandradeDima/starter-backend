@@ -89,14 +89,17 @@ export async function searchPagination(
   const phone = clientPhone?.trim();
 
   if (name) {
+    console.log("name",name);
     clauses.push('nombre LIKE ?');
     params.push(`%${name}%`);
   }
   if (email) {
+    console.log("email",email);
     clauses.push('email LIKE ?');
     params.push(`%${email}%`);
   }
   if (phone) {
+    console.log("phone",phone);
     clauses.push('telefono LIKE ?');
     params.push(`%${phone}%`);
   }
@@ -105,7 +108,7 @@ export async function searchPagination(
     'SELECT id, nombre, email, telefono, created_at AS createdAt, updated_at AS updatedAt FROM clientes';
 
   if (clauses.length) {
-    query += ' WHERE ' + clauses.join(' AND ');
+    query += ' WHERE ' + clauses.join(' OR ');
   }
   if(sortField && sortOrder){
     query += ` ORDER BY ${sortField} ${sortOrder}`;
@@ -119,3 +122,4 @@ export async function searchPagination(
   const [rows] = await pool.execute<(Cliente & RowDataPacket)[]>(query, params);
   return rows;
 }
+

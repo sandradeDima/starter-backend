@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import type { Express } from 'express';
 import * as ReportesService from '../services/reportes.service';
+import { logger } from '../config/logger';
 
 export async function getAllReportes(req: Request, res: Response) {
     const mensaje = await ReportesService.getAllReportes();
@@ -21,6 +22,8 @@ export async function getReportesByCliente(req: Request, res: Response) {
 
 export async function createReporte(req: Request, res: Response) {
     const { clienteId, fechaServicio, horaServicio, coloracionId, formula, observaciones, precio } = req.body;
+    logger.info("horaServicio",horaServicio);
+    logger.info("fechaServicio",fechaServicio);
     const mensaje = await ReportesService.createReporte(
         clienteId,
         new Date(fechaServicio),

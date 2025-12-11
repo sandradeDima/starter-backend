@@ -163,11 +163,12 @@ export async function searchClientesPagination(page: string, size: string, clien
     try {
         const mensaje = new MensajeApi();
         const clientes = await ClientesRepo.searchPagination(parseInt(page), parseInt(size), clientName, clientEmail, clientPhone, sortField, sortOrder);
-        const total = (clientes
-
-            
-        ).length;
+        const total = (clientes).length;
+        console.log("clientes",clientes);
+        console.log("total",total);
         const pages = Math.ceil(total / parseInt(size));
+        console.log("page",page);
+        console.log("pages",pages);
         //chheck if page is valid
         if (parseInt(page) < 1 || parseInt(page) > pages) {
             mensaje.code = 404;
