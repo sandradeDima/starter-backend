@@ -28,6 +28,11 @@ app.use(rateLimit({windowMs:60_000, max:120}));
 // Static files for uploaded images
 app.use('/images', express.static(path.resolve(process.cwd(), 'uploads', 'images')));
 
+// Health check
+app.get('/health', (_req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
+
 app.use('/api', router);
 app.use(errorHandler);
 
